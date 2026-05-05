@@ -235,51 +235,57 @@
         .bg-rose-50 { background-color: rgba(255, 27, 27, 0.13) !important; }
         .border, .border-t, .border-b, .border-2 { border-color: rgba(255, 27, 27, 0.22) !important; }
 
-
-        .vpn-click-card { cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
-        .vpn-click-card:active { transform: scale(0.985); }
-        .plan-card {
-            width: 100%;
-            background: linear-gradient(135deg, rgba(255, 27, 27, 0.18), rgba(16,16,18,0.98));
-            border: 1px solid rgba(255, 64, 64, 0.34);
-            border-radius: 22px;
-            padding: 18px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #fff !important;
-            font-weight: 900;
-            box-shadow: 0 12px 28px -18px rgba(255,0,0,0.95);
-        }
-        .plan-card span, .plan-card b { color: #fff !important; }
-        .plan-card small { display: block; color: #ff9a9a; font-size: 10px; margin-top: 4px; }
-        .empty-note, .admin-empty {
-            background: rgba(255,255,255,0.055);
-            border: 1px dashed rgba(255, 68, 68, 0.35);
-            color: #ffb3b3;
-            border-radius: 18px;
-            padding: 16px;
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.6;
-            text-align: center;
-        }
-        .sheet-head-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 999px;
-            background: rgba(255, 27, 27, 0.16) !important;
-            border: 1px solid rgba(255, 27, 27, 0.35) !important;
-            color: #fff !important;
-            font-size: 22px;
-            font-weight: 900;
-            line-height: 1;
-        }
-
         .swal2-popup { background: #101010 !important; color: #fff !important; border: 1px solid rgba(255,27,27,0.25); border-radius: 24px !important; }
         .swal2-confirm { background: linear-gradient(135deg, #ff1b1b, #8d0009) !important; border-radius: 14px !important; }
         .swal2-cancel { background: #2d2d2d !important; border-radius: 14px !important; }
+
+        .vpn-click-card { cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+        .vpn-click-card:active { transform: scale(0.985); }
+        .copy-number-box {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 27, 27, 0.20), rgba(0,0,0,0.72)) !important;
+            border: 1.5px solid rgba(255, 27, 27, 0.42) !important;
+            color: #fff !important;
+            border-radius: 26px;
+            padding: 18px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            cursor: pointer;
+            box-shadow: 0 16px 36px -20px rgba(255, 0, 0, 0.95), inset 0 1px 0 rgba(255,255,255,0.08);
+            transition: transform .16s ease, border-color .16s ease, background .16s ease;
+        }
+        .copy-number-box:active {
+            transform: scale(0.985);
+            border-color: #ff3333 !important;
+            background: linear-gradient(135deg, rgba(255, 27, 27, 0.30), rgba(0,0,0,0.85)) !important;
+        }
+        .copy-number-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: #ff9b9b;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .copy-number-value {
+            font-size: 25px;
+            font-weight: 950;
+            color: #fff !important;
+            word-break: break-word;
+            line-height: 1.2;
+            text-shadow: 0 0 18px rgba(255, 27, 27, 0.30);
+        }
+        .copy-number-hint {
+            font-size: 10px;
+            font-weight: 800;
+            color: #ffd0d0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body>
@@ -288,7 +294,7 @@
 
     <div id="loading-screen">
         <div class="loader-ring"></div>
-        <p class="mt-4 font-bold text-slate-400 text-sm tracking-widest animate-pulse uppercase">PHANTOM VPN Zone</p>
+        <p class="mt-4 font-bold text-slate-400 text-sm tracking-widest animate-pulse uppercase">Phantom VPN Zone</p>
     </div>
 
     <div class="max-w-md mx-auto">
@@ -335,7 +341,7 @@
     <div id="admin-panel" class="fixed inset-0 bg-slate-50 z-[5000] hidden flex flex-col">
         <div class="p-6 flex justify-between items-center bg-white border-b">
             <h2 class="font-black text-xl">Admin Control</h2>
-            <button onclick="closeAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
+            <button onclick="closeAdmin()" class="modal-close">&times;</button>
         </div>
         <div class="p-4 bg-white">
             <div class="adm-nav">
@@ -384,9 +390,11 @@
             <div id="user-pay-options" class="grid grid-cols-2 gap-3 mb-6"></div>
             <div id="pay-details" class="hidden">
                 <div id="active-method-wrap" class="mb-4"></div>
-                <div class="bg-indigo-50 p-6 rounded-3xl mb-4" onclick="copyText(document.getElementById('active-num').innerText)">
-                    <b id="active-num" class="text-2xl text-indigo-700"></b>
-                </div>
+                <button id="payment-copy-box" type="button" class="copy-number-box" onclick="copyPaymentNumber()" title="Click to copy payment number">
+                    <span class="copy-number-label">Payment Number</span>
+                    <b id="active-num" class="copy-number-value"></b>
+                    <span class="copy-number-hint"><i class="fa-regular fa-copy"></i> Tap number to copy</span>
+                </button>
                 <b id="target-price" class="text-xl block mb-6 text-indigo-600"></b>
                 <input type="text" id="trx-id" placeholder="Transaction ID" class="w-full p-4 border-2 rounded-2xl text-center uppercase mb-4 outline-none">
                 <button onclick="orderNow()" class="btn-p">Confirm Order</button>
@@ -394,19 +402,32 @@
         </div>
     </div>
 
+
+    <script>
+        // Prevent permanent loading screen if Firebase/CDN is slow or blocked.
+        window.hideAppLoader = function() {
+            const loader = document.getElementById('loading-screen');
+            if (!loader) return;
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 500);
+        };
+        window.addEventListener('load', () => setTimeout(window.hideAppLoader, 1400));
+        setTimeout(window.hideAppLoader, 4500);
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, remove, update, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyByR2zIRpu0RJIEpwHh-FT-KpvuJM22TH8",
-  authDomain: "phantom-vpn-zone.firebaseapp.com",
-  databaseURL: "https://phantom-vpn-zone-default-rtdb.firebaseio.com",
-  projectId: "phantom-vpn-zone",
-  storageBucket: "phantom-vpn-zone.firebasestorage.app",
-  messagingSenderId: "632752430859",
-  appId: "1:632752430859:web:f999cff55e6d78dd280c0e",
-  measurementId: "G-SK65GSPHVV"
+            apiKey: "AIzaSyByR2zIRpu0RJIEpwHh-FT-KpvuJM22TH8",
+            authDomain: "phantom-vpn-zone.firebaseapp.com",
+            databaseURL: "https://phantom-vpn-zone-default-rtdb.firebaseio.com",
+            projectId: "phantom-vpn-zone",
+            storageBucket: "phantom-vpn-zone.firebasestorage.app",
+            messagingSenderId: "632752430859",
+            appId: "1:632752430859:web:f999cff55e6d78dd280c0e",
+            measurementId: "G-SK65GSPHVV"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -445,35 +466,19 @@
             const label = logoFallbackText(name);
             return `<span class="pay-logo-wrap"><img src="${esc(src)}" class="${sizeClass}" alt="${esc(name)} logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"><span class="pay-logo-fallback">${label}</span></span>`;
         }
-        function svgData(svg) {
-            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-        }
-        function brandTextLogo(label, bg, fg = '#ffffff') {
-            const safeLabel = String(label || 'PAY').replace(/[<>&"']/g, '');
-            return svgData(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="${bg}"/><circle cx="104" cy="22" r="18" fill="rgba(255,255,255,.18)"/><text x="64" y="74" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="900" fill="${fg}">${safeLabel}</text></svg>`);
-        }
-        function bkashLogo() {
-            return svgData(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#e2136e"/><path d="M34 28 91 52 61 63 34 28Z" fill="#fff" opacity=".96"/><path d="M61 63 95 88 43 78 61 63Z" fill="#fff" opacity=".86"/><path d="M34 28 43 78 25 66 34 28Z" fill="#fff" opacity=".72"/><text x="64" y="111" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="900" fill="#fff">bKash</text></svg>`);
-        }
-        function nagadLogo() {
-            return svgData(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#f05a24"/><circle cx="38" cy="41" r="16" fill="#fff" opacity=".96"/><path d="M54 34h39c8 0 14 6 14 14s-6 14-14 14H54V34Z" fill="#fff" opacity=".96"/><text x="64" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="900" fill="#fff">NAGAD</text></svg>`);
-        }
-        function binanceLogo() {
-            return svgData(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#0b0e11"/><path d="M64 18 78 32 64 46 50 32 64 18Zm-26 26 14 14-14 14-14-14 14-14Zm52 0 14 14-14 14-14-14 14-14ZM64 54l18 18-18 18-18-18 18-18Zm0 28 14 14-14 14-14-14 14-14Z" fill="#f0b90b"/><text x="64" y="121" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="900" fill="#f0b90b">BINANCE</text></svg>`);
-        }
         function getPaymentLogo(name, customLogo = '') {
             if (customLogo && String(customLogo).trim()) return String(customLogo).trim();
-            const n = String(name || '').toLowerCase().replace(/[\s_\-]+/g, '');
-            if (n.includes('bkash') || n.includes('bikash') || n.includes('বিকাশ')) return bkashLogo();
-            if (n.includes('nagad') || n.includes('নগদ')) return nagadLogo();
-            if (n.includes('binance') || n.includes('bnb')) return binanceLogo();
-            if (n.includes('rocket') || n.includes('রকেট')) return brandTextLogo('ROCKET', '#8a1d8f');
-            if (n.includes('upay') || n.includes('উপায়')) return brandTextLogo('UPAY', '#0072ce');
-            if (n.includes('usdt') || n.includes('tether')) return brandTextLogo('USDT', '#26a17b');
-            if (n.includes('paypal')) return brandTextLogo('PayPal', '#003087');
-            if (n.includes('visa')) return brandTextLogo('VISA', '#1a1f71');
-            if (n.includes('master')) return brandTextLogo('MCARD', '#eb001b');
-            const domain = `${n.replace(/[^a-z0-9]/g, '') || 'payment'}.com`;
+            const n = String(name || '').toLowerCase();
+            const map = [
+                ['bkash', 'bkash.com'], ['bikash', 'bkash.com'], ['বিকাশ', 'bkash.com'],
+                ['nagad', 'nagad.com.bd'], ['নগদ', 'nagad.com.bd'],
+                ['rocket', 'dutchbanglabank.com'], ['রকেট', 'dutchbanglabank.com'],
+                ['upay', 'upaybd.com'], ['উপায়', 'upaybd.com'], ['ucb', 'ucb.com.bd'],
+                ['binance', 'binance.com'], ['usdt', 'tether.to'], ['paypal', 'paypal.com'],
+                ['visa', 'visa.com'], ['master', 'mastercard.com'], ['card', 'visa.com']
+            ];
+            const found = map.find(([key]) => n.includes(key));
+            const domain = found ? found[1] : `${n.replace(/[^a-z0-9]/g, '') || 'payment'}.com`;
             return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
         }
         function notify(title, icon = 'success', body = '') {
@@ -494,63 +499,81 @@
         function initParticles() {
             const canvas = document.getElementById('particle-canvas');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+            if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+                canvas.style.display = 'none';
+                return;
+            }
+            const ctx = canvas.getContext('2d', { alpha: true });
             const targetFPS = 90;
             const frameInterval = 1000 / targetFPS;
             let lastFrame = 0;
             let particles = [];
+            let rafId = null;
+            let resizeTimer = null;
+            let width = window.innerWidth;
+            let height = window.innerHeight;
 
-            function resize() {
-                const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                canvas.width = Math.floor(window.innerWidth * dpr);
-                canvas.height = Math.floor(window.innerHeight * dpr);
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                const count = Math.min(120, Math.max(55, Math.floor(window.innerWidth / 6)));
-                particles = Array.from({ length: count }, () => makeParticle(true));
-            }
             function makeParticle(randomY = false) {
                 return {
-                    x: Math.random() * window.innerWidth,
-                    y: randomY ? Math.random() * window.innerHeight : -20 - Math.random() * 120,
-                    r: Math.random() * 2.2 + 0.6,
-                    speed: Math.random() * 1.7 + 0.8,
-                    drift: (Math.random() - 0.5) * 0.35,
-                    alpha: Math.random() * 0.55 + 0.18,
-                    length: Math.random() * 16 + 8
+                    x: Math.random() * width,
+                    y: randomY ? Math.random() * height : -20 - Math.random() * 100,
+                    r: Math.random() * 1.8 + 0.45,
+                    speed: Math.random() * 1.35 + 0.65,
+                    drift: (Math.random() - 0.5) * 0.28,
+                    alpha: Math.random() * 0.48 + 0.14,
+                    length: Math.random() * 13 + 7
                 };
             }
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const isSmall = width < 420;
+                const count = Math.min(isSmall ? 55 : 75, Math.max(38, Math.floor(width / 9)));
+                particles = Array.from({ length: count }, () => makeParticle(true));
+            }
+
             function draw(ts) {
-                requestAnimationFrame(draw);
+                rafId = requestAnimationFrame(draw);
+                if (document.hidden) return;
                 if (ts - lastFrame < frameInterval) return;
                 lastFrame = ts;
-                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                const gradient = ctx.createRadialGradient(window.innerWidth * 0.72, 0, 0, window.innerWidth * 0.72, 0, window.innerWidth * 0.95);
-                gradient.addColorStop(0, 'rgba(255, 0, 0, 0.15)');
-                gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.035)';
+                ctx.fillRect(0, 0, width, height);
 
-                particles.forEach((p, i) => {
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
                     p.y += p.speed;
                     p.x += p.drift;
-                    if (p.y > window.innerHeight + 35 || p.x < -20 || p.x > window.innerWidth + 20) particles[i] = makeParticle(false);
+                    if (p.y > height + 35 || p.x < -24 || p.x > width + 24) {
+                        particles[i] = makeParticle(false);
+                        continue;
+                    }
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(255, 32, 32, ${p.alpha})`;
+                    ctx.strokeStyle = `rgba(255, 38, 38, ${p.alpha})`;
                     ctx.lineWidth = p.r;
                     ctx.moveTo(p.x, p.y);
                     ctx.lineTo(p.x - p.drift * 10, p.y + p.length);
                     ctx.stroke();
-                    ctx.beginPath();
-                    ctx.fillStyle = `rgba(255, 68, 68, ${Math.min(p.alpha + 0.18, 0.9)})`;
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fill();
-                });
+                }
             }
+
             resize();
-            window.addEventListener('resize', resize);
-            requestAnimationFrame(draw);
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(resize, 140);
+            }, { passive: true });
+            document.addEventListener('visibilitychange', () => {
+                lastFrame = performance.now();
+            });
+            rafId = requestAnimationFrame(draw);
         }
 
         window.onload = () => {
@@ -561,10 +584,7 @@
             initParticles();
             enableFullNotifications();
             sync();
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
-                setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
-            }, 1200);
+            setTimeout(window.hideAppLoader, 1200);
         };
 
         function getVpnLogo(vName) { 
@@ -573,92 +593,127 @@
         }
 
         function sync() {
-            onValue(ref(db, 'supportUrl'), (s) => document.getElementById('support-link').href = s.val() || "#");
-            
+            onValue(ref(db, 'supportUrl'), (s) => {
+                const url = s.val() || '#';
+                document.getElementById('support-link').href = url;
+                const supportInput = document.getElementById('set-support-url');
+                if (supportInput && !supportInput.value) supportInput.value = url === '#' ? '' : url;
+            });
+
             onValue(ref(db, 'vpns'), (s) => {
-                const uBox = document.getElementById('vpn-list'), aBox = document.getElementById('adm-vpn-list'), 
-                      sSelect = document.getElementById('stock-vpn-id'), sInv = document.getElementById('stock-inventory-list');
-                uBox.innerHTML = ''; aBox.innerHTML = ''; sSelect.innerHTML = ''; sInv.innerHTML = '';
-                const d = s.val(); if(d) Object.keys(d).forEach(id => {
-                    const v = d[id], count = v.stock ? Object.keys(v.stock).length : 0, isOff = v.status === "OFF";
-                    const logo = getVpnLogo(v.name);
+                const uBox = document.getElementById('vpn-list');
+                const aBox = document.getElementById('adm-vpn-list');
+                const sSelect = document.getElementById('stock-vpn-id');
+                const sInv = document.getElementById('stock-inventory-list');
+                const d = s.val();
 
-                   // স্টক থাকুক বা না থাকুক, শুধুমাত্র অ্যাডমিন সুইচ OFF থাকলে কার্ড কাজ করবে না
-                   uBox.innerHTML += `<div role="button" tabindex="0" onclick="${!isOff ? `openPlans('${jsStr(id)}')` : ''}" class="card vpn-click-card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
-                   <div class="flex items-center gap-4"><img src="${logo}" class="vpn-img"><b>${v.name}</b></div>
-                   <span class="text-[9px] font-black px-3 py-1.5 rounded-lg ${!isOff ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}">
-                   ${isOff ? 'OFFLINE' : 'ONLINE'}
-                   </span></div>`;
+                if(!d) {
+                    uBox.innerHTML = `<div class="card text-center py-8"><b>No VPN package added yet</b><p class="text-[10px] text-slate-400 mt-2">Admin can add VPN brands from Admin panel.</p></div>`;
+                    aBox.innerHTML = `<div class="card text-center text-[11px] text-slate-400">No VPN brand added yet</div>`;
+                    sInv.innerHTML = `<div class="card text-center text-[11px] text-slate-400">No stock available</div>`;
+                    sSelect.innerHTML = `<option value="">No VPN brand</option>`;
+                    return;
+                }
 
-                    aBox.innerHTML += `<div class="card space-y-4">
-                        <div class="flex justify-between items-center"><div class="flex items-center gap-2"><img src="${logo}" class="w-8 h-8 rounded-lg"><b>${v.name}</b></div>
-                        <div class="flex items-center gap-3"><label class="switch"><input type="checkbox" ${!isOff?'checked':''} onchange="toggleV('${id}', this.checked)"><span class="slider"></span></label><i onclick="delV('${id}')" class="fa-solid fa-trash text-rose-300"></i></div></div>
+                const userCards = [];
+                const adminCards = [];
+                const stockOptions = [];
+                const inventoryCards = [];
+
+                Object.keys(d).forEach(id => {
+                    const v = d[id] || {};
+                    const name = v.name || 'VPN';
+                    const isOff = v.status === 'OFF';
+                    const logo = getVpnLogo(name);
+                    const safeId = jsStr(id);
+                    const count = v.stock ? Object.keys(v.stock).length : 0;
+
+                    userCards.push(`<div onclick="${!isOff ? `openPlans('${safeId}')` : ''}" class="card vpn-click-card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
+                        <div class="flex items-center gap-4"><img src="${esc(logo)}" class="vpn-img" alt="${esc(name)}"><div><b>${esc(name)}</b><p class="text-[9px] text-slate-400 mt-1">${count} account(s) ready</p></div></div>
+                        <span class="text-[9px] font-black px-3 py-1.5 rounded-lg ${!isOff ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}">${isOff ? 'OFFLINE' : 'ONLINE'}</span>
+                    </div>`);
+
+                    adminCards.push(`<div class="card space-y-4">
+                        <div class="flex justify-between items-center"><div class="flex items-center gap-2"><img src="${esc(logo)}" class="w-8 h-8 rounded-lg" alt="${esc(name)}"><b>${esc(name)}</b></div>
+                        <div class="flex items-center gap-3"><label class="switch"><input type="checkbox" ${!isOff?'checked':''} onchange="toggleV('${safeId}', this.checked)"><span class="slider"></span></label><i onclick="delV('${safeId}')" class="fa-solid fa-trash text-rose-300"></i></div></div>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="p1n-${id}" value="${v.p1n||''}" placeholder="Plan 1" class="adm-mini-input"><input type="number" id="p1p-${id}" value="${v.p1p||''}" placeholder="Price" class="adm-mini-input">
-                            <input type="text" id="p2n-${id}" value="${v.p2n||''}" placeholder="Plan 2" class="adm-mini-input"><input type="number" id="p2p-${id}" value="${v.p2p||''}" placeholder="Price" class="adm-mini-input">
-                        </div><button onclick="saveV('${id}')" class="btn-p py-2.5 text-[10px]">Update Configuration</button></div>`;
+                            <input type="text" id="p1n-${esc(id)}" value="${esc(v.p1n||'')}" placeholder="Plan 1" class="adm-mini-input"><input type="number" id="p1p-${esc(id)}" value="${esc(v.p1p||'')}" placeholder="Price" class="adm-mini-input">
+                            <input type="text" id="p2n-${esc(id)}" value="${esc(v.p2n||'')}" placeholder="Plan 2" class="adm-mini-input"><input type="number" id="p2p-${esc(id)}" value="${esc(v.p2p||'')}" placeholder="Price" class="adm-mini-input">
+                        </div><button onclick="saveV('${safeId}')" class="btn-p py-2.5 text-[10px]">Update Configuration</button></div>`);
 
-                    sSelect.innerHTML += `<option value="${id}">${v.name}</option>`;
+                    stockOptions.push(`<option value="${esc(id)}">${esc(name)}</option>`);
+
                     if(v.stock) {
-                        let inv = `<div class="p-3 bg-slate-50 rounded-2xl"><b class="text-[10px] uppercase">${v.name} Stock</b><div class="mt-2 space-y-1">`;
-                        Object.keys(v.stock).forEach(sk => {
-                            inv += `<div class="flex justify-between text-[10px] bg-white p-2 rounded"><span>${v.stock[sk].email}</span><i onclick="delStockItem('${id}','${sk}')" class="fa-solid fa-times text-rose-400"></i></div>`;
-                        });
-                        sInv.innerHTML += inv + `</div></div>`;
+                        const items = Object.keys(v.stock).map(sk => {
+                            const stock = v.stock[sk] || {};
+                            return `<div class="flex justify-between text-[10px] bg-white p-2 rounded"><span>${esc(stock.email || '')}</span><i onclick="delStockItem('${safeId}','${jsStr(sk)}')" class="fa-solid fa-times text-rose-400"></i></div>`;
+                        }).join('');
+                        inventoryCards.push(`<div class="p-3 bg-slate-50 rounded-2xl"><b class="text-[10px] uppercase">${esc(name)} Stock (${count})</b><div class="mt-2 space-y-1">${items}</div></div>`);
                     }
                 });
+
+                uBox.innerHTML = userCards.join('');
+                aBox.innerHTML = adminCards.join('');
+                sSelect.innerHTML = stockOptions.join('');
+                sInv.innerHTML = inventoryCards.join('') || `<div class="card text-center text-[11px] text-slate-400">No stock available</div>`;
             });
 
             onValue(ref(db, 'orders'), (s) => {
-                const aP = document.getElementById('adm-pending'), uBox = document.getElementById('user-orders');
-                aP.innerHTML = ''; uBox.innerHTML = ''; let pCount = 0;
+                const aP = document.getElementById('adm-pending');
+                const uBox = document.getElementById('user-orders');
+                let pCount = 0;
+                const pendingCards = [];
+                const userCards = [];
                 const currentUserOrderStates = {};
-                const d = s.val(); if(d) Object.keys(d).forEach(id => {
-                    const o = d[id];
-                    if(o.st === "Pending") { 
-                        pCount++; 
-                        aP.innerHTML += `<div class="card space-y-3">
-                            <div class="flex justify-between"><b>${esc(o.user)}</b> <span class="text-[10px] font-bold text-indigo-600">${esc(o.method)}: ${esc(o.trx)}</span></div>
-                            <p class="text-[10px]">${esc(o.vpn)} (${esc(o.plan)}) - ${esc(o.date || '')}</p>
+                const d = s.val();
+
+                if(d) Object.keys(d).forEach(id => {
+                    const o = d[id] || {};
+                    const safeOrderId = jsStr(id);
+                    if(o.st === 'Pending') {
+                        pCount++;
+                        pendingCards.push(`<div class="card space-y-3">
+                            <div class="flex justify-between gap-2"><b>${esc(o.user || 'User')}</b> <span class="text-[10px] font-bold text-indigo-600">${esc(o.method || '')}: ${esc(o.trx || '')}</span></div>
+                            <p class="text-[10px]">${esc(o.vpn || '')} (${esc(o.plan || '')}) - ${esc(o.date || '')}</p>
                             <div class="flex gap-2">
-                                <button onclick="showStockList('${id}','${o.vpn_id}')" class="btn-p py-3 text-[10px]">Deliver</button>
-                                <button onclick="rejectOrder('${id}')" class="btn-reject">Reject</button>
+                                <button onclick="showStockList('${safeOrderId}','${jsStr(o.vpn_id || '')}')" class="btn-p py-3 text-[10px]">Deliver</button>
+                                <button onclick="rejectOrder('${safeOrderId}')" class="btn-reject">Reject</button>
                             </div>
-                        </div>`; 
+                        </div>`);
                     }
-                    if(o.uid == UID) {
+                    if(String(o.uid) === String(UID)) {
                         currentUserOrderStates[id] = o.st;
-                        let stColor = o.st === "Approved" ? "bg-emerald-50 text-emerald-600" : (o.st === "Rejected" ? "bg-rose-50 text-rose-600" : "bg-indigo-50 text-indigo-600");
-                        uBox.innerHTML += `<div class="card space-y-2">
-                            <div class="flex justify-between items-start">
-                                <div><b class="text-sm">${esc(o.vpn)}</b><p class="text-[9px] text-slate-400 mt-1">${esc(o.date || '')}</p></div>
-                                <span class="text-[10px] font-bold px-2 py-1 rounded ${stColor}">${esc(o.st)}</span>
+                        const stColor = o.st === 'Approved' ? 'bg-emerald-50 text-emerald-600' : (o.st === 'Rejected' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600');
+                        userCards.push(`<div class="card space-y-2">
+                            <div class="flex justify-between items-start gap-3">
+                                <div><b class="text-sm">${esc(o.vpn || '')}</b><p class="text-[9px] text-slate-400 mt-1">${esc(o.date || '')}</p></div>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded ${stColor}">${esc(o.st || '')}</span>
                             </div>
-                            ${o.email ? `
-                            <div class="mt-3 space-y-2">
+                            ${o.email ? `<div class="mt-3 space-y-2">
                                 <div class="acc-box" onclick="copyText('${jsStr(o.email)}')">
                                     <div class="flex flex-col"><span class="acc-label">Email / ID</span><span class="acc-value">${esc(o.email)}</span></div>
                                     <i class="fa-regular fa-copy text-indigo-400 text-xs"></i>
                                 </div>
-                                <div class="acc-box" onclick="copyText('${jsStr(o.pass)}')">
-                                    <div class="flex flex-col"><span class="acc-label">Password</span><span class="acc-value">${esc(o.pass)}</span></div>
+                                <div class="acc-box" onclick="copyText('${jsStr(o.pass || '')}')">
+                                    <div class="flex flex-col"><span class="acc-label">Password</span><span class="acc-value">${esc(o.pass || '')}</span></div>
                                     <i class="fa-regular fa-copy text-indigo-400 text-xs"></i>
                                 </div>
-                            </div>
-                            ` : ''}
-                            ${o.st === "Rejected" ? `<p class="text-[9px] text-rose-500 font-bold italic mt-2">Order was rejected by admin.</p>` : ''}
-                        </div>`;
+                            </div>` : ''}
+                            ${o.st === 'Rejected' ? `<p class="text-[9px] text-rose-500 font-bold italic mt-2">Order was rejected by admin.</p>` : ''}
+                        </div>`);
                     }
                 });
+
+                aP.innerHTML = pendingCards.join('') || `<div class="card text-center text-[11px] text-slate-400">No pending order</div>`;
+                uBox.innerHTML = userCards.join('') || `<div class="card text-center text-[11px] text-slate-400">No order yet</div>`;
+
                 document.getElementById('p-count').innerText = pCount;
                 const badge = document.getElementById('p-count-badge');
                 badge.innerText = pCount;
                 badge.className = pCount > 0 ? 'bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full animate-bounce' : 'hidden';
 
                 if (ordersReady) {
-                    if (ADMINS.includes(UID.toString()) && pCount > lastPendingCount) {
-                        notify('New pending order received', 'info', `${pCount} pending order(s)`);
-                    }
+                    if (ADMINS.includes(UID.toString()) && pCount > lastPendingCount) notify('New pending order received', 'info', `${pCount} pending order(s)`);
                     Object.keys(currentUserOrderStates).forEach(orderId => {
                         const oldStatus = userOrderStates[orderId];
                         const newStatus = currentUserOrderStates[orderId];
@@ -674,33 +729,32 @@
             });
 
             onValue(ref(db, 'payments'), (s) => {
-                const uP = document.getElementById('user-pay-options'), pL = document.getElementById('pay-list');
-                uP.innerHTML = ''; pL.innerHTML = '';
+                const uP = document.getElementById('user-pay-options');
+                const pL = document.getElementById('pay-list');
                 const d = s.val();
-                const keys = d ? Object.keys(d) : [];
-                paymentMethodsLoaded = true;
-                paymentMethodsCount = keys.length;
-
-                if (!keys.length) {
-                    uP.innerHTML = `<div class="empty-note col-span-2">No payment method added yet.</div>`;
-                    pL.innerHTML = `<div class="admin-empty">No payment method found. Add bKash, Nagad, or Binance.</div>`;
+                if(!d) {
+                    uP.innerHTML = `<div class="col-span-2 card text-center text-[11px] text-slate-400">No payment method added yet</div>`;
+                    pL.innerHTML = `<div class="card text-center text-[11px] text-slate-400">No payment method added</div>`;
                     return;
                 }
-
-                keys.forEach(id => {
+                const payCards = [];
+                const adminPayRows = [];
+                Object.keys(d).forEach(id => {
                     const pay = d[id] || {};
                     const name = pay.name || 'Payment';
                     const num = pay.num || '';
                     const logo = getPaymentLogo(name, pay.logo || '');
-                    uP.innerHTML += `<button type="button" onclick="setPay('${jsStr(name)}','${jsStr(num)}','${jsStr(logo)}', this)" class="pay-card">
+                    payCards.push(`<button type="button" onclick="setPay('${jsStr(name)}','${jsStr(num)}','${jsStr(logo)}', this)" class="pay-card">
                         ${logoMarkup(logo, name)}
                         <span>${esc(name)}</span>
-                    </button>`;
-                    pL.innerHTML += `<div class="flex justify-between items-center text-[10px] p-2 bg-slate-50 rounded-xl">
+                    </button>`);
+                    adminPayRows.push(`<div class="list-action-row flex justify-between items-center text-[10px] p-2 rounded-xl">
                         <div class="flex items-center gap-2">${logoMarkup(logo, name)}<span>${esc(name)} (${esc(num)})</span></div>
-                        <i onclick="delPay('${id}')" class="fa-solid fa-times text-rose-400"></i>
-                    </div>`;
+                        <i onclick="delPay('${jsStr(id)}')" class="fa-solid fa-times text-rose-400"></i>
+                    </div>`);
                 });
+                uP.innerHTML = payCards.join('');
+                pL.innerHTML = adminPayRows.join('');
             });
         }
 
@@ -748,86 +802,34 @@
         };
 
         let curV, curPl, curPr, curVid, curMethod;
-        let paymentMethodsLoaded = false;
-        let paymentMethodsCount = 0;
-
-        window.closeModal = function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.style.display = 'none';
-        }
-
-        window.showModal = function showModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.style.display = 'flex';
-        }
-
-        window.openPlans = async (id) => {
-            const modal = document.getElementById('plan-modal');
-            const content = document.getElementById('plan-content');
-            content.innerHTML = `<div class="empty-note">Loading package...</div>`;
-            showModal('plan-modal');
-
-            try {
-                const snap = await get(ref(db, `vpns/${id}`));
-                if (!snap.exists()) {
-                    content.innerHTML = `<div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl">Package Not Found</h3><button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button></div><div class="empty-note">This VPN package is missing from Firebase. Please refresh and try again.</div>`;
-                    return;
-                }
-
-                const v = snap.val() || {};
+        window.openPlans = (id) => {
+            get(ref(db,`vpns/${id}`)).then(s => {
+                const v = s.val();
+                if(!v || v.status === 'OFF') return notify('This VPN is offline', 'warning');
                 curV = v.name || 'VPN';
                 curVid = id;
-                const safeName = esc(curV);
-                const logo = getVpnLogo(curV);
-                const plans = [];
-
-                if (String(v.p1n || '').trim()) plans.push({ name: String(v.p1n || '').trim(), price: String(v.p1p || '').trim() });
-                if (String(v.p2n || '').trim()) plans.push({ name: String(v.p2n || '').trim(), price: String(v.p2p || '').trim() });
-
-                let h = `<div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-3"><img src="${esc(logo)}" class="w-10 h-10 rounded-lg bg-white p-1"><div><h3 class="font-black text-xl">${safeName}</h3><p class="text-[10px] text-slate-400 font-bold">Choose a plan to continue payment</p></div></div>
-                    <button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button>
-                </div>`;
-
-                if (!plans.length) {
-                    h += `<div class="empty-note">No plan added for this VPN yet.<br>Admin: go to <b>Admin &gt; VPN MGMT</b>, add Plan Name + Price, then click <b>Update Configuration</b>.</div>`;
-                    content.innerHTML = h;
-                    notify('No plan added for this VPN', 'warning');
-                    return;
-                }
-
-                plans.forEach((pl, index) => {
-                    const priceText = pl.price ? `৳${esc(pl.price)}` : 'Price not set';
-                    h += `<button type="button" onclick="goPay('${jsStr(pl.name)}','${jsStr(pl.price)}')" class="plan-card">
-                        <span><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i>${esc(pl.name)}<small>Plan ${index + 1}</small></span>
-                        <b>${priceText}</b>
-                    </button>`;
-                });
-
-                content.innerHTML = h;
-            } catch (err) {
-                content.innerHTML = `<div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl">Cannot Open Package</h3><button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button></div><div class="empty-note">Firebase read failed. Please check Realtime Database rules and internet connection.</div>`;
-                console.error(err);
-                notify('Cannot load VPN package', 'error');
-            }
+                const planCards = [];
+                if(v.p1n && v.p1p) planCards.push(`<button type="button" onclick="goPay('${jsStr(v.p1n)}','${jsStr(v.p1p)}')" class="card bg-indigo-50 mb-3 p-5 flex justify-between items-center w-full text-left"><span>${esc(v.p1n)}</span><b class="text-indigo-600">৳${esc(v.p1p)}</b></button>`);
+                if(v.p2n && v.p2p) planCards.push(`<button type="button" onclick="goPay('${jsStr(v.p2n)}','${jsStr(v.p2p)}')" class="card bg-indigo-50 mb-3 p-5 flex justify-between items-center w-full text-left"><span>${esc(v.p2n)}</span><b class="text-indigo-600">৳${esc(v.p2p)}</b></button>`);
+                const h = `<div class="flex justify-between items-center mb-6"><div class="flex items-center gap-3"><img src="${esc(getVpnLogo(curV))}" class="w-10 h-10 rounded-lg" alt="${esc(curV)}"><h3 class="font-black text-xl">${esc(curV)}</h3></div><button onclick="this.closest('.modal').style.display='none'" class="modal-close">&times;</button></div>
+                    ${planCards.length ? planCards.join('') : `<div class="card text-center text-[11px] text-slate-400">No plan added yet. Add plan name and price from Admin Panel.</div>`}`;
+                document.getElementById('plan-content').innerHTML = h;
+                document.getElementById('plan-modal').style.display = 'flex';
+            }).catch(() => notify('Failed to load VPN plan', 'error'));
         };
 
         window.goPay = (n, p) => {
             curPl = n;
             curPr = p;
             curMethod = '';
-            closeModal('plan-modal');
+            document.getElementById('plan-modal').style.display='none';
+            document.getElementById('pay-modal').style.display='flex';
             document.getElementById('pay-details').classList.add('hidden');
             document.getElementById('active-method-wrap').innerHTML = '';
             document.getElementById('active-num').innerText = '';
-            document.getElementById('target-price').innerText = "Price: ৳" + (p || '0');
-
-            if (!paymentMethodsLoaded || paymentMethodsCount === 0) {
-                document.getElementById('user-pay-options').innerHTML = `<div class="empty-note col-span-2">No payment method added yet.<br>Admin: add bKash, Nagad, or Binance from Admin &gt; VPN MGMT.</div>`;
-            }
-            showModal('pay-modal');
+            document.getElementById('target-price').innerText = 'Price: ৳' + p;
+            document.querySelectorAll('.pay-card').forEach(card => card.classList.remove('active'));
         };
-
         window.setPay = (n, m, logo = '', el = null) => {
             curMethod = n;
             document.querySelectorAll('.pay-card').forEach(card => card.classList.remove('active'));
@@ -835,7 +837,7 @@
             document.getElementById('active-num').innerText = m;
             document.getElementById('active-method-wrap').innerHTML = `<span class="active-method-pill">${logoMarkup(logo || getPaymentLogo(n), n)} ${esc(n)} selected</span>`;
             document.getElementById('pay-details').classList.remove('hidden');
-            notify(`${n} selected`, 'success');
+            notify(`${n} selected. Tap number to copy.`, 'success');
         };
 
         window.orderNow = () => {
@@ -851,10 +853,11 @@
         window.showStockList = async (orderId, vpnId) => {
             const snap = await get(ref(db, `vpns/${vpnId}/stock`));
             const content = document.getElementById('stock-select-content');
-            let h = `<div class="mb-4 font-bold flex justify-between">Select Account <button class="sheet-head-btn" onclick="this.closest('.modal').style.display='none'">&times;</button></div>`;
+            let h = `<div class="mb-4 font-bold flex justify-between">Select Account <button onclick="this.closest('.modal').style.display='none'" class="modal-close">&times;</button></div>`;
             if(snap.exists()) {
                 Object.keys(snap.val()).forEach(sk => {
-                    h += `<button class="w-full text-left p-4 bg-slate-50 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${orderId}','${vpnId}','${sk}')">${snap.val()[sk].email}</button>`;
+                    const stock = snap.val()[sk] || {};
+                    h += `<button type="button" class="stock-choice-btn text-left p-4 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${jsStr(orderId)}','${jsStr(vpnId)}','${jsStr(sk)}')">${esc(stock.email || '')}</button>`;
                 });
             } else h += `<p class="text-rose-500">Stock empty!</p>`;
             content.innerHTML = h; document.getElementById('stock-select-modal').style.display = 'flex';
@@ -883,9 +886,48 @@
             document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
             document.getElementById('adm-'+t).classList.remove('hidden');
         };
-        window.openAdmin = () => { if(!ADMINS.includes(UID.toString())) return notify('Admin access only', 'error'); document.getElementById('admin-panel').classList.remove('hidden'); };
+        window.openAdmin = async () => {
+            if (!ADMINS.includes(UID.toString())) {
+                notify('Admin access only', 'error');
+                return;
+            }
+            adminUnlocked = true;
+            document.getElementById('admin-btn-nav').classList.remove('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+        };
         window.closeAdmin = () => document.getElementById('admin-panel').classList.add('hidden');
-        window.copyText = (t) => { navigator.clipboard.writeText(t); notify('Copied', 'success'); };
+        async function writeClipboard(text) {
+            const value = String(text || '').trim();
+            if (!value) throw new Error('Empty text');
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(value);
+                return;
+            }
+            const ta = document.createElement('textarea');
+            ta.value = value;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            ta.style.top = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        window.copyText = async (t) => {
+            try {
+                await writeClipboard(t);
+                notify('Copied', 'success');
+            } catch (e) {
+                notify('Copy failed. Long press and copy manually.', 'error');
+            }
+        };
+        window.copyPaymentNumber = () => {
+            const num = document.getElementById('active-num').innerText.trim();
+            if(!num) return notify('Select payment method first', 'warning');
+            window.copyText(num);
+        };
     </script>
 </body>
 </html>
