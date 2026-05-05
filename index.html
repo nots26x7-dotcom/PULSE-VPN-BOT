@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM VPN ZONE</title>
+    <title>BEST VPN ZONE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -162,8 +162,7 @@
             width: 48px;
             height: 48px;
             border-radius: 16px;
-            object-fit: contain;
-            padding: 4px;
+            object-fit: cover;
             background: #fff;
             border: 1px solid rgba(255, 27, 27, 0.25);
             box-shadow: 0 10px 22px rgba(0,0,0,0.22);
@@ -237,35 +236,36 @@
         .border, .border-t, .border-b, .border-2 { border-color: rgba(255, 27, 27, 0.22) !important; }
 
 
-        /* Strong visible buttons for black + red theme */
-        button, a {
-            -webkit-appearance: none;
-            appearance: none;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        button { color: inherit; }
-        .btn-p, .btn-reject, .pay-card, .adm-tab, .nav-btn, .modal-close, .stock-choice-btn {
-            display: inline-flex;
+        .vpn-click-card { cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+        .vpn-click-card:active { transform: scale(0.985); }
+        .plan-card {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 27, 27, 0.18), rgba(16,16,18,0.98));
+            border: 1px solid rgba(255, 64, 64, 0.34);
+            border-radius: 22px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
+            justify-content: space-between;
             color: #fff !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            font-weight: 900;
+            box-shadow: 0 12px 28px -18px rgba(255,0,0,0.95);
         }
-        .btn-p {
-            min-height: 46px;
-            background: linear-gradient(135deg, #ff3030 0%, #c40012 48%, #5c0007 100%) !important;
-            border: 1px solid rgba(255,255,255,0.14) !important;
-            box-shadow: 0 0 0 1px rgba(255, 27, 27, 0.25), 0 14px 32px -12px rgba(255, 27, 27, 0.9) !important;
+        .plan-card span, .plan-card b { color: #fff !important; }
+        .plan-card small { display: block; color: #ff9a9a; font-size: 10px; margin-top: 4px; }
+        .empty-note, .admin-empty {
+            background: rgba(255,255,255,0.055);
+            border: 1px dashed rgba(255, 68, 68, 0.35);
+            color: #ffb3b3;
+            border-radius: 18px;
+            padding: 16px;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.6;
+            text-align: center;
         }
-        .btn-reject {
-            min-height: 42px;
-            background: rgba(255, 27, 27, 0.18) !important;
-            border: 1px solid rgba(255, 87, 87, 0.38) !important;
-            color: #ffb3b3 !important;
-        }
-        .modal-close {
+        .sheet-head-btn {
             width: 38px;
             height: 38px;
             border-radius: 999px;
@@ -276,48 +276,6 @@
             font-weight: 900;
             line-height: 1;
         }
-        .nav-btn {
-            min-width: 58px;
-            padding: 8px 6px;
-            border-radius: 16px;
-            color: #b8b8b8 !important;
-        }
-        .nav-btn.text-indigo-600 {
-            color: #fff !important;
-            background: linear-gradient(135deg, rgba(255, 27, 27, 0.22), rgba(255, 27, 27, 0.08));
-            border: 1px solid rgba(255, 27, 27, 0.26);
-        }
-        .adm-tab {
-            border: 1px solid transparent;
-            background: rgba(255,255,255,0.035);
-        }
-        .adm-tab-active { border-color: rgba(255,255,255,0.16) !important; }
-        .pay-card {
-            background: linear-gradient(180deg, rgba(255, 27, 27, 0.18) 0%, rgba(12, 12, 16, 0.96) 100%) !important;
-            border: 2px solid rgba(255, 58, 58, 0.38) !important;
-            color: #fff !important;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 28px -18px rgba(255,0,0,0.9);
-        }
-        .pay-card span { color: #fff !important; }
-        .pay-card.active {
-            background: linear-gradient(135deg, rgba(255, 27, 27, 0.34), rgba(70, 0, 6, 0.98)) !important;
-            border-color: #ff4040 !important;
-            box-shadow: 0 0 0 3px rgba(255, 27, 27, 0.18), 0 16px 36px -18px rgba(255,0,0,1);
-        }
-        .stock-choice-btn, .list-action-row {
-            width: 100%;
-            background: rgba(255,255,255,0.075) !important;
-            border: 1px solid rgba(255, 27, 27, 0.28) !important;
-            color: #fff !important;
-        }
-        .pay-logo-wrap, .pay-logo, .pay-logo-fallback { flex-shrink: 0; }
-        .pay-logo {
-            object-fit: contain !important;
-            padding: 3px;
-            background: #fff !important;
-        }
-        .pay-logo-fallback { display: none; }
-        select.adm-mini-input option { background: #111; color: #fff; }
 
         .swal2-popup { background: #101010 !important; color: #fff !important; border: 1px solid rgba(255,27,27,0.25); border-radius: 24px !important; }
         .swal2-confirm { background: linear-gradient(135deg, #ff1b1b, #8d0009) !important; border-radius: 14px !important; }
@@ -330,12 +288,12 @@
 
     <div id="loading-screen">
         <div class="loader-ring"></div>
-        <p class="mt-4 font-bold text-slate-400 text-sm tracking-widest animate-pulse uppercase">PHANTOM VPN ZONE</p>
+        <p class="mt-4 font-bold text-slate-400 text-sm tracking-widest animate-pulse uppercase">Best VPN Zone</p>
     </div>
 
     <div class="max-w-md mx-auto">
         <header class="p-6 flex justify-between items-center">
-            <h1 class="font-black text-2xl tracking-tighter italic">PHANTOM<span class="text-indigo-600"> VPN ZONE</span></h1>
+            <h1 class="font-black text-2xl tracking-tighter italic">BEST<span class="text-indigo-600">VPN-ZONE</span></h1>
             <div id="p-count-badge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full animate-bounce">0</div>
         </header>
 
@@ -377,7 +335,7 @@
     <div id="admin-panel" class="fixed inset-0 bg-slate-50 z-[5000] hidden flex flex-col">
         <div class="p-6 flex justify-between items-center bg-white border-b">
             <h2 class="font-black text-xl">Admin Control</h2>
-            <button onclick="closeAdmin()" class="modal-close">&times;</button>
+            <button onclick="closeAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
         </div>
         <div class="p-4 bg-white">
             <div class="adm-nav">
@@ -441,14 +399,13 @@
         import { getDatabase, ref, onValue, push, remove, update, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyByR2zIRpu0RJIEpwHh-FT-KpvuJM22TH8",
-            authDomain: "phantom-vpn-zone.firebaseapp.com",
-            databaseURL: "https://phantom-vpn-zone-default-rtdb.firebaseio.com",
-            projectId: "phantom-vpn-zone",
-            storageBucket: "phantom-vpn-zone.firebasestorage.app",
-            messagingSenderId: "632752430859",
-            appId: "1:632752430859:web:f999cff55e6d78dd280c0e",
-            measurementId: "G-SK65GSPHVV"
+            apiKey: "AIzaSyDZQHw4-DdUdDmJXcuK_88JrJxv35FfYeY",
+            authDomain: "vpn-store-s26x.firebaseapp.com",
+            databaseURL: "https://vpn-store-s26x-default-rtdb.firebaseio.com",
+            projectId: "vpn-store-s26x",
+            storageBucket: "vpn-store-s26x.firebasestorage.app",
+            messagingSenderId: "373050662329",
+            appId: "1:373050662329:web:b3d02424ef0986d6abea68"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -458,8 +415,7 @@
 
         const UID = tg.initDataUnsafe?.user?.id || "0000";
         const UNAME = tg.initDataUnsafe?.user?.first_name || "Guest";
-        const ADMINS = ["8583821482"];
-        let adminUnlocked = ADMINS.includes(UID.toString());
+        const ADMINS = ["8505710811", "7940769450"];
 
         const toast = Swal.mixin({
             toast: true,
@@ -526,7 +482,7 @@
                 tg.HapticFeedback?.notificationOccurred?.(hapticType);
             } catch (e) {}
             if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-                try { new Notification(title, { body: body || 'PHANTOM VPN ZONE', icon: getPaymentLogo('bkash') }); } catch (e) {}
+                try { new Notification(title, { body: body || 'BEST VPN ZONE', icon: getPaymentLogo('bkash') }); } catch (e) {}
             }
         }
         function enableFullNotifications() {
@@ -600,8 +556,7 @@
             document.getElementById('u-nickname').innerText = UNAME;
             document.getElementById('display-uid').innerText = "ID: " + UID;
             document.getElementById('u-pic').src = tg.initDataUnsafe?.user?.photo_url || `https://ui-avatars.com/api/?name=${UNAME}&background=ff1b1b&color=fff`;
-            if(adminUnlocked) document.getElementById('admin-btn-nav').classList.remove('hidden');
-            else document.getElementById('admin-btn-nav').classList.add('hidden');
+            if(ADMINS.includes(UID.toString())) document.getElementById('admin-btn-nav').classList.remove('hidden');
             initParticles();
             enableFullNotifications();
             sync();
@@ -623,20 +578,12 @@
                 const uBox = document.getElementById('vpn-list'), aBox = document.getElementById('adm-vpn-list'), 
                       sSelect = document.getElementById('stock-vpn-id'), sInv = document.getElementById('stock-inventory-list');
                 uBox.innerHTML = ''; aBox.innerHTML = ''; sSelect.innerHTML = ''; sInv.innerHTML = '';
-                const d = s.val();
-                if(!d) {
-                    uBox.innerHTML = `<div class="card text-center py-8"><b>No VPN package added yet</b><p class="text-[10px] text-slate-400 mt-2">Admin can add VPN brands from Admin panel.</p></div>`;
-                    aBox.innerHTML = `<div class="admin-empty">No VPN brand added yet</div>`;
-                    sInv.innerHTML = `<div class="admin-empty">No stock available</div>`;
-                    sSelect.innerHTML = `<option value="">No VPN brand</option>`;
-                    return;
-                }
-                Object.keys(d).forEach(id => {
+                const d = s.val(); if(d) Object.keys(d).forEach(id => {
                     const v = d[id], count = v.stock ? Object.keys(v.stock).length : 0, isOff = v.status === "OFF";
                     const logo = getVpnLogo(v.name);
 
                    // স্টক থাকুক বা না থাকুক, শুধুমাত্র অ্যাডমিন সুইচ OFF থাকলে কার্ড কাজ করবে না
-                   uBox.innerHTML += `<div onclick="${!isOff ? `openPlans('${id}')` : ''}" class="card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
+                   uBox.innerHTML += `<div role="button" tabindex="0" onclick="${!isOff ? `openPlans('${jsStr(id)}')` : ''}" class="card vpn-click-card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
                    <div class="flex items-center gap-4"><img src="${logo}" class="vpn-img"><b>${v.name}</b></div>
                    <span class="text-[9px] font-black px-3 py-1.5 rounded-lg ${!isOff ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}">
                    ${isOff ? 'OFFLINE' : 'ONLINE'}
@@ -729,21 +676,26 @@
                 const uP = document.getElementById('user-pay-options'), pL = document.getElementById('pay-list');
                 uP.innerHTML = ''; pL.innerHTML = '';
                 const d = s.val();
-                if(!d) {
-                    uP.innerHTML = `<div class="col-span-2 admin-empty">No payment method added yet</div>`;
-                    pL.innerHTML = `<div class="admin-empty">No payment methods saved</div>`;
+                const keys = d ? Object.keys(d) : [];
+                paymentMethodsLoaded = true;
+                paymentMethodsCount = keys.length;
+
+                if (!keys.length) {
+                    uP.innerHTML = `<div class="empty-note col-span-2">No payment method added yet.</div>`;
+                    pL.innerHTML = `<div class="admin-empty">No payment method found. Add bKash, Nagad, or Binance.</div>`;
                     return;
                 }
-                Object.keys(d).forEach(id => {
+
+                keys.forEach(id => {
                     const pay = d[id] || {};
                     const name = pay.name || 'Payment';
                     const num = pay.num || '';
                     const logo = getPaymentLogo(name, pay.logo || '');
-                    uP.innerHTML += `<button onclick="setPay('${jsStr(name)}','${jsStr(num)}','${jsStr(logo)}', this)" class="pay-card">
+                    uP.innerHTML += `<button type="button" onclick="setPay('${jsStr(name)}','${jsStr(num)}','${jsStr(logo)}', this)" class="pay-card">
                         ${logoMarkup(logo, name)}
                         <span>${esc(name)}</span>
                     </button>`;
-                    pL.innerHTML += `<div class="list-action-row flex justify-between items-center text-[10px] p-2 rounded-xl">
+                    pL.innerHTML += `<div class="flex justify-between items-center text-[10px] p-2 bg-slate-50 rounded-xl">
                         <div class="flex items-center gap-2">${logoMarkup(logo, name)}<span>${esc(name)} (${esc(num)})</span></div>
                         <i onclick="delPay('${id}')" class="fa-solid fa-times text-rose-400"></i>
                     </div>`;
@@ -795,19 +747,96 @@
         };
 
         let curV, curPl, curPr, curVid, curMethod;
-        window.openPlans = (id) => {
-            get(ref(db,`vpns/${id}`)).then(s => {
-                const v = s.val(); curV = v.name; curVid = id;
-                let h = `<div class="flex justify-between items-center mb-6"><div class="flex items-center gap-3"><img src="${getVpnLogo(v.name)}" class="w-10 h-10 rounded-lg"><h3 class="font-black text-xl">${v.name}</h3></div><button onclick="this.closest('.modal').style.display='none'" class="modal-close">&times;</button></div>`;
-                if(v.p1n) h += `<div onclick="goPay('${v.p1n}','${v.p1p}')" class="card bg-indigo-50 mb-3 p-5 flex justify-between items-center"><span>${v.p1n}</span><b class="text-indigo-600">৳${v.p1p}</b></div>`;
-                if(v.p2n) h += `<div onclick="goPay('${v.p2n}','${v.p2p}')" class="card bg-indigo-50 mb-3 p-5 flex justify-between items-center"><span>${v.p2n}</span><b class="text-indigo-600">৳${v.p2p}</b></div>`;
-                document.getElementById('plan-content').innerHTML = h; document.getElementById('plan-modal').style.display = 'flex';
-            });
+        let paymentMethodsLoaded = false;
+        let paymentMethodsCount = 0;
+
+        window.closeModal = function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        window.showModal = function showModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        window.openPlans = async (id) => {
+            const modal = document.getElementById('plan-modal');
+            const content = document.getElementById('plan-content');
+            content.innerHTML = `<div class="empty-note">Loading package...</div>`;
+            showModal('plan-modal');
+
+            try {
+                const snap = await get(ref(db, `vpns/${id}`));
+                if (!snap.exists()) {
+                    content.innerHTML = `<div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl">Package Not Found</h3><button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button></div><div class="empty-note">This VPN package is missing from Firebase. Please refresh and try again.</div>`;
+                    return;
+                }
+
+                const v = snap.val() || {};
+                curV = v.name || 'VPN';
+                curVid = id;
+                const safeName = esc(curV);
+                const logo = getVpnLogo(curV);
+                const plans = [];
+
+                if (String(v.p1n || '').trim()) plans.push({ name: String(v.p1n || '').trim(), price: String(v.p1p || '').trim() });
+                if (String(v.p2n || '').trim()) plans.push({ name: String(v.p2n || '').trim(), price: String(v.p2p || '').trim() });
+
+                let h = `<div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-3"><img src="${esc(logo)}" class="w-10 h-10 rounded-lg bg-white p-1"><div><h3 class="font-black text-xl">${safeName}</h3><p class="text-[10px] text-slate-400 font-bold">Choose a plan to continue payment</p></div></div>
+                    <button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button>
+                </div>`;
+
+                if (!plans.length) {
+                    h += `<div class="empty-note">No plan added for this VPN yet.<br>Admin: go to <b>Admin &gt; VPN MGMT</b>, add Plan Name + Price, then click <b>Update Configuration</b>.</div>`;
+                    content.innerHTML = h;
+                    notify('No plan added for this VPN', 'warning');
+                    return;
+                }
+
+                plans.forEach((pl, index) => {
+                    const priceText = pl.price ? `৳${esc(pl.price)}` : 'Price not set';
+                    h += `<button type="button" onclick="goPay('${jsStr(pl.name)}','${jsStr(pl.price)}')" class="plan-card">
+                        <span><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i>${esc(pl.name)}<small>Plan ${index + 1}</small></span>
+                        <b>${priceText}</b>
+                    </button>`;
+                });
+
+                content.innerHTML = h;
+            } catch (err) {
+                content.innerHTML = `<div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl">Cannot Open Package</h3><button class="sheet-head-btn" onclick="closeModal('plan-modal')">&times;</button></div><div class="empty-note">Firebase read failed. Please check Realtime Database rules and internet connection.</div>`;
+                console.error(err);
+                notify('Cannot load VPN package', 'error');
+            }
         };
 
-        window.goPay = (n, p) => { curPl = n; curPr = p; curMethod = ''; document.getElementById('plan-modal').style.display='none'; document.getElementById('pay-modal').style.display='flex'; document.getElementById('pay-details').classList.add('hidden'); document.getElementById('active-method-wrap').innerHTML = ''; document.getElementById('target-price').innerText = "Price: ৳"+p; };
-        window.setPay = (n, m, logo = '', el = null) => { curMethod = n; document.querySelectorAll('.pay-card').forEach(card => card.classList.remove('active')); if(el) el.classList.add('active'); document.getElementById('active-num').innerText = m; document.getElementById('active-method-wrap').innerHTML = `<span class="active-method-pill">${logoMarkup(logo || getPaymentLogo(n), n)} ${esc(n)} selected</span>`; document.getElementById('pay-details').classList.remove('hidden'); notify(`${n} selected`, 'success'); };
-        
+        window.goPay = (n, p) => {
+            curPl = n;
+            curPr = p;
+            curMethod = '';
+            closeModal('plan-modal');
+            document.getElementById('pay-details').classList.add('hidden');
+            document.getElementById('active-method-wrap').innerHTML = '';
+            document.getElementById('active-num').innerText = '';
+            document.getElementById('target-price').innerText = "Price: ৳" + (p || '0');
+
+            if (!paymentMethodsLoaded || paymentMethodsCount === 0) {
+                document.getElementById('user-pay-options').innerHTML = `<div class="empty-note col-span-2">No payment method added yet.<br>Admin: add bKash, Nagad, or Binance from Admin &gt; VPN MGMT.</div>`;
+            }
+            showModal('pay-modal');
+        };
+
+        window.setPay = (n, m, logo = '', el = null) => {
+            curMethod = n;
+            document.querySelectorAll('.pay-card').forEach(card => card.classList.remove('active'));
+            if(el) el.classList.add('active');
+            document.getElementById('active-num').innerText = m;
+            document.getElementById('active-method-wrap').innerHTML = `<span class="active-method-pill">${logoMarkup(logo || getPaymentLogo(n), n)} ${esc(n)} selected</span>`;
+            document.getElementById('pay-details').classList.remove('hidden');
+            notify(`${n} selected`, 'success');
+        };
+
         window.orderNow = () => {
             const trx = document.getElementById('trx-id').value.trim(); if(!curMethod) return notify('Select payment method first', 'warning'); if(!trx) return notify('Enter Transaction ID', 'warning');
             const now = new Date();
@@ -821,10 +850,10 @@
         window.showStockList = async (orderId, vpnId) => {
             const snap = await get(ref(db, `vpns/${vpnId}/stock`));
             const content = document.getElementById('stock-select-content');
-            let h = `<div class="mb-4 font-bold flex justify-between">Select Account <button onclick="this.closest('.modal').style.display='none'" class="modal-close">&times;</button></div>`;
+            let h = `<div class="mb-4 font-bold flex justify-between">Select Account <button class="sheet-head-btn" onclick="this.closest('.modal').style.display='none'">&times;</button></div>`;
             if(snap.exists()) {
                 Object.keys(snap.val()).forEach(sk => {
-                    h += `<button class="stock-choice-btn text-left p-4 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${orderId}','${vpnId}','${sk}')">${snap.val()[sk].email}</button>`;
+                    h += `<button class="w-full text-left p-4 bg-slate-50 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${orderId}','${vpnId}','${sk}')">${snap.val()[sk].email}</button>`;
                 });
             } else h += `<p class="text-rose-500">Stock empty!</p>`;
             content.innerHTML = h; document.getElementById('stock-select-modal').style.display = 'flex';
@@ -853,15 +882,7 @@
             document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
             document.getElementById('adm-'+t).classList.remove('hidden');
         };
-        window.openAdmin = async () => {
-            // Admin panel is only available for the real Telegram admin ID.
-            if (!ADMINS.includes(UID.toString())) {
-                document.getElementById('admin-btn-nav').classList.add('hidden');
-                return notify('Admin access only', 'error');
-            }
-            adminUnlocked = true;
-            document.getElementById('admin-panel').classList.remove('hidden');
-        };
+        window.openAdmin = () => { if(!ADMINS.includes(UID.toString())) return notify('Admin access only', 'error'); document.getElementById('admin-panel').classList.remove('hidden'); };
         window.closeAdmin = () => document.getElementById('admin-panel').classList.add('hidden');
         window.copyText = (t) => { navigator.clipboard.writeText(t); notify('Copied', 'success'); };
     </script>
