@@ -235,6 +235,28 @@
         .bg-rose-50 { background-color: rgba(255, 27, 27, 0.13) !important; }
         .border, .border-t, .border-b, .border-2 { border-color: rgba(255, 27, 27, 0.22) !important; }
 
+
+        .admin-empty {
+            padding: 20px;
+            border: 1px dashed rgba(255, 27, 27, 0.28);
+            border-radius: 18px;
+            text-align: center;
+            color: #a3a3a3;
+            font-size: 11px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.035);
+        }
+        .admin-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: rgba(255,27,27,0.14);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,27,27,0.22);
+        }
+
         .swal2-popup { background: #101010 !important; color: #fff !important; border: 1px solid rgba(255,27,27,0.25); border-radius: 24px !important; }
         .swal2-confirm { background: linear-gradient(135deg, #ff1b1b, #8d0009) !important; border-radius: 14px !important; }
         .swal2-cancel { background: #2d2d2d !important; border-radius: 14px !important; }
@@ -291,9 +313,15 @@
     </div>
 
     <div id="admin-panel" class="fixed inset-0 bg-slate-50 z-[5000] hidden flex flex-col">
-        <div class="p-6 flex justify-between items-center bg-white border-b">
-            <h2 class="font-black text-xl">Admin Control</h2>
-            <button onclick="closeAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
+        <div class="p-6 flex justify-between items-center bg-white border-b gap-3">
+            <div>
+                <h2 class="font-black text-xl">Admin Control</h2>
+                <p id="admin-status" class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest">Checking admin access...</p>
+            </div>
+            <div class="flex gap-2 items-center">
+                <button onclick="forceRefreshAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold text-xs" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
+                <button onclick="closeAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
+            </div>
         </div>
         <div class="p-4 bg-white">
             <div class="adm-nav">
@@ -401,6 +429,30 @@
         let ordersReady = false;
         let lastPendingCount = 0;
         let userOrderStates = {};
+        const ADMIN_UNLOCK_KEY = 'phantom_admin_access_8583821482';
+
+        function isAdmin() {
+            return ADMINS.includes(UID.toString()) || sessionStorage.getItem(ADMIN_UNLOCK_KEY) === 'yes';
+        }
+        function isBrowserPreview() {
+            return UID.toString() === '0000' || !tg.initDataUnsafe?.user?.id;
+        }
+        function updateAdminStatus() {
+            const status = document.getElementById('admin-status');
+            if (!status) return;
+            const mode = ADMINS.includes(UID.toString()) ? 'Telegram Admin' : (sessionStorage.getItem(ADMIN_UNLOCK_KEY) === 'yes' ? 'Manual Admin Login' : 'No Admin Access');
+            status.innerHTML = `<span class="admin-chip"><i class="fa-solid fa-shield-halved"></i>${esc(mode)}</span> <span class="ml-2">UID: ${esc(UID)}</span>`;
+        }
+        function showAdminNavIfAllowed() {
+            const adminBtn = document.getElementById('admin-btn-nav');
+            if (!adminBtn) return;
+            if (isAdmin() || isBrowserPreview()) adminBtn.classList.remove('hidden');
+            else adminBtn.classList.add('hidden');
+        }
+        function dbError(area, err) {
+            console.error(area, err);
+            notify(`${area} load failed`, 'error', err?.message || 'Check Firebase rules and database URL.');
+        }
 
         function esc(v) {
             return String(v ?? '').replace(/[&<>"]/g, (m) => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[m]));
@@ -512,7 +564,8 @@
             document.getElementById('u-nickname').innerText = UNAME;
             document.getElementById('display-uid').innerText = "ID: " + UID;
             document.getElementById('u-pic').src = tg.initDataUnsafe?.user?.photo_url || `https://ui-avatars.com/api/?name=${UNAME}&background=ff1b1b&color=fff`;
-            if(ADMINS.includes(UID.toString())) document.getElementById('admin-btn-nav').classList.remove('hidden');
+            showAdminNavIfAllowed();
+            updateAdminStatus();
             initParticles();
             enableFullNotifications();
             sync();
@@ -525,68 +578,93 @@
         }
 
         function sync() {
-            onValue(ref(db, 'supportUrl'), (s) => document.getElementById('support-link').href = s.val() || "#");
+            onValue(ref(db, 'supportUrl'), (s) => {
+                const url = s.val() || "#";
+                document.getElementById('support-link').href = url;
+                const supportInput = document.getElementById('set-support-url');
+                if (supportInput && document.activeElement !== supportInput) supportInput.value = url === "#" ? "" : url;
+            }, (err) => dbError('Support link', err));
             
             onValue(ref(db, 'vpns'), (s) => {
-                const uBox = document.getElementById('vpn-list'), aBox = document.getElementById('adm-vpn-list'), 
+                const uBox = document.getElementById('vpn-list'), aBox = document.getElementById('adm-vpn-list'),
                       sSelect = document.getElementById('stock-vpn-id'), sInv = document.getElementById('stock-inventory-list');
                 uBox.innerHTML = ''; aBox.innerHTML = ''; sSelect.innerHTML = ''; sInv.innerHTML = '';
                 const d = s.val();
-                if(!d) { uBox.innerHTML = `<div class="card text-center py-8"><b>No VPN package added yet</b><p class="text-[10px] text-slate-400 mt-2">Admin can add VPN brands from Admin panel.</p></div>`; }
-                if(d) Object.keys(d).forEach(id => {
-                    const v = d[id], count = v.stock ? Object.keys(v.stock).length : 0, isOff = v.status === "OFF";
-                    const logo = getVpnLogo(v.name);
 
-                   // স্টক থাকুক বা না থাকুক, শুধুমাত্র অ্যাডমিন সুইচ OFF থাকলে কার্ড কাজ করবে না
-                   uBox.innerHTML += `<div onclick="${!isOff ? `openPlans('${id}')` : ''}" class="card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
-                   <div class="flex items-center gap-4"><img src="${logo}" class="vpn-img"><b>${v.name}</b></div>
-                   <span class="text-[9px] font-black px-3 py-1.5 rounded-lg ${!isOff ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}">
-                   ${isOff ? 'OFFLINE' : 'ONLINE'}
-                   </span></div>`;
+                if (!d) {
+                    uBox.innerHTML = `<div class="admin-empty">No VPN package added yet.</div>`;
+                    aBox.innerHTML = `<div class="admin-empty">No VPN brand found. Add a VPN brand from this panel.</div>`;
+                    sSelect.innerHTML = `<option value="">No VPN brand available</option>`;
+                    sInv.innerHTML = `<div class="admin-empty">Stock will appear here after adding VPN accounts.</div>`;
+                    return;
+                }
+
+                Object.keys(d).forEach(id => {
+                    const v = d[id] || {};
+                    const stockCount = v.stock ? Object.keys(v.stock).length : 0;
+                    const isOff = v.status === "OFF";
+                    const safeName = esc(v.name || 'VPN');
+                    const logo = getVpnLogo(v.name || 'vpn');
+
+                    uBox.innerHTML += `<div onclick="${!isOff ? `openPlans('${id}')` : ''}" class="card flex justify-between items-center bg-white ${isOff ? 'disabled-card' : ''}">
+                        <div class="flex items-center gap-4"><img src="${logo}" class="vpn-img"><div><b>${safeName}</b><p class="text-[9px] text-slate-400 font-bold mt-1">Stock: ${stockCount}</p></div></div>
+                        <span class="text-[9px] font-black px-3 py-1.5 rounded-lg ${!isOff ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}">
+                        ${isOff ? 'OFFLINE' : 'ONLINE'}
+                        </span></div>`;
 
                     aBox.innerHTML += `<div class="card space-y-4">
-                        <div class="flex justify-between items-center"><div class="flex items-center gap-2"><img src="${logo}" class="w-8 h-8 rounded-lg"><b>${v.name}</b></div>
-                        <div class="flex items-center gap-3"><label class="switch"><input type="checkbox" ${!isOff?'checked':''} onchange="toggleV('${id}', this.checked)"><span class="slider"></span></label><i onclick="delV('${id}')" class="fa-solid fa-trash text-rose-300"></i></div></div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2"><img src="${logo}" class="w-8 h-8 rounded-lg"><div><b>${safeName}</b><p class="text-[9px] text-slate-400 font-bold">Stock: ${stockCount}</p></div></div>
+                            <div class="flex items-center gap-3"><label class="switch"><input type="checkbox" ${!isOff?'checked':''} onchange="toggleV('${id}', this.checked)"><span class="slider"></span></label><i onclick="delV('${id}')" class="fa-solid fa-trash text-rose-300"></i></div>
+                        </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="p1n-${id}" value="${v.p1n||''}" placeholder="Plan 1" class="adm-mini-input"><input type="number" id="p1p-${id}" value="${v.p1p||''}" placeholder="Price" class="adm-mini-input">
-                            <input type="text" id="p2n-${id}" value="${v.p2n||''}" placeholder="Plan 2" class="adm-mini-input"><input type="number" id="p2p-${id}" value="${v.p2p||''}" placeholder="Price" class="adm-mini-input">
+                            <input type="text" id="p1n-${id}" value="${esc(v.p1n||'')}" placeholder="Plan 1" class="adm-mini-input"><input type="number" id="p1p-${id}" value="${esc(v.p1p||'')}" placeholder="Price" class="adm-mini-input">
+                            <input type="text" id="p2n-${id}" value="${esc(v.p2n||'')}" placeholder="Plan 2" class="adm-mini-input"><input type="number" id="p2p-${id}" value="${esc(v.p2p||'')}" placeholder="Price" class="adm-mini-input">
                         </div><button onclick="saveV('${id}')" class="btn-p py-2.5 text-[10px]">Update Configuration</button></div>`;
 
-                    sSelect.innerHTML += `<option value="${id}">${v.name}</option>`;
+                    sSelect.innerHTML += `<option value="${id}">${safeName}</option>`;
                     if(v.stock) {
-                        let inv = `<div class="p-3 bg-slate-50 rounded-2xl"><b class="text-[10px] uppercase">${v.name} Stock</b><div class="mt-2 space-y-1">`;
+                        let inv = `<div class="p-3 bg-slate-50 rounded-2xl"><b class="text-[10px] uppercase">${safeName} Stock (${stockCount})</b><div class="mt-2 space-y-1">`;
                         Object.keys(v.stock).forEach(sk => {
-                            inv += `<div class="flex justify-between text-[10px] bg-white p-2 rounded"><span>${v.stock[sk].email}</span><i onclick="delStockItem('${id}','${sk}')" class="fa-solid fa-times text-rose-400"></i></div>`;
+                            const item = v.stock[sk] || {};
+                            inv += `<div class="flex justify-between text-[10px] bg-white p-2 rounded"><span>${esc(item.email || 'No email')}</span><i onclick="delStockItem('${id}','${sk}')" class="fa-solid fa-times text-rose-400"></i></div>`;
                         });
                         sInv.innerHTML += inv + `</div></div>`;
                     }
                 });
-            });
+                if (!sInv.innerHTML.trim()) sInv.innerHTML = `<div class="admin-empty">No stock saved yet.</div>`;
+            }, (err) => dbError('VPN/Admin data', err));
 
             onValue(ref(db, 'orders'), (s) => {
                 const aP = document.getElementById('adm-pending'), uBox = document.getElementById('user-orders');
                 aP.innerHTML = ''; uBox.innerHTML = ''; let pCount = 0;
                 const currentUserOrderStates = {};
-                const d = s.val(); if(d) Object.keys(d).forEach(id => {
-                    const o = d[id];
-                    if(o.st === "Pending") { 
-                        pCount++; 
+                const d = s.val();
+                if(d) Object.keys(d).reverse().forEach(id => {
+                    const o = d[id] || {};
+                    if(o.st === "Pending") {
+                        pCount++;
                         aP.innerHTML += `<div class="card space-y-3">
-                            <div class="flex justify-between"><b>${esc(o.user)}</b> <span class="text-[10px] font-bold text-indigo-600">${esc(o.method)}: ${esc(o.trx)}</span></div>
-                            <p class="text-[10px]">${esc(o.vpn)} (${esc(o.plan)}) - ${esc(o.date || '')}</p>
+                            <div class="flex justify-between gap-3"><b>${esc(o.user || 'Guest')}</b> <span class="text-[10px] font-bold text-indigo-600 text-right">${esc(o.method || 'Payment')}: ${esc(o.trx || '')}</span></div>
+                            <p class="text-[10px]">${esc(o.vpn || 'VPN')} (${esc(o.plan || '')}) - ${esc(o.date || '')}</p>
+                            <div class="grid grid-cols-3 gap-2 text-[10px]">
+                                <div class="bg-slate-50 p-2 rounded-xl"><b>Price</b><br>৳${esc(o.price || '')}</div>
+                                <div class="bg-slate-50 p-2 rounded-xl"><b>UID</b><br>${esc(o.uid || '')}</div>
+                                <div class="bg-slate-50 p-2 rounded-xl"><b>Status</b><br>${esc(o.st || '')}</div>
+                            </div>
                             <div class="flex gap-2">
-                                <button onclick="showStockList('${id}','${o.vpn_id}')" class="btn-p py-3 text-[10px]">Deliver</button>
+                                <button onclick="showStockList('${id}','${esc(o.vpn_id || '')}')" class="btn-p py-3 text-[10px]">Deliver</button>
                                 <button onclick="rejectOrder('${id}')" class="btn-reject">Reject</button>
                             </div>
-                        </div>`; 
+                        </div>`;
                     }
                     if(o.uid == UID) {
                         currentUserOrderStates[id] = o.st;
                         let stColor = o.st === "Approved" ? "bg-emerald-50 text-emerald-600" : (o.st === "Rejected" ? "bg-rose-50 text-rose-600" : "bg-indigo-50 text-indigo-600");
                         uBox.innerHTML += `<div class="card space-y-2">
                             <div class="flex justify-between items-start">
-                                <div><b class="text-sm">${esc(o.vpn)}</b><p class="text-[9px] text-slate-400 mt-1">${esc(o.date || '')}</p></div>
-                                <span class="text-[10px] font-bold px-2 py-1 rounded ${stColor}">${esc(o.st)}</span>
+                                <div><b class="text-sm">${esc(o.vpn || 'VPN')}</b><p class="text-[9px] text-slate-400 mt-1">${esc(o.date || '')}</p></div>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded ${stColor}">${esc(o.st || '')}</span>
                             </div>
                             ${o.email ? `
                             <div class="mt-3 space-y-2">
@@ -604,13 +682,16 @@
                         </div>`;
                     }
                 });
+                if (!aP.innerHTML.trim()) aP.innerHTML = `<div class="admin-empty">No pending orders now.</div>`;
+                if (!uBox.innerHTML.trim()) uBox.innerHTML = `<div class="admin-empty">You have no orders yet.</div>`;
+
                 document.getElementById('p-count').innerText = pCount;
                 const badge = document.getElementById('p-count-badge');
                 badge.innerText = pCount;
                 badge.className = pCount > 0 ? 'bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full animate-bounce' : 'hidden';
 
                 if (ordersReady) {
-                    if (ADMINS.includes(UID.toString()) && pCount > lastPendingCount) {
+                    if (isAdmin() && pCount > lastPendingCount) {
                         notify('New pending order received', 'info', `${pCount} pending order(s)`);
                     }
                     Object.keys(currentUserOrderStates).forEach(orderId => {
@@ -625,12 +706,18 @@
                 lastPendingCount = pCount;
                 userOrderStates = currentUserOrderStates;
                 ordersReady = true;
-            });
+            }, (err) => dbError('Orders', err));
 
             onValue(ref(db, 'payments'), (s) => {
                 const uP = document.getElementById('user-pay-options'), pL = document.getElementById('pay-list');
                 uP.innerHTML = ''; pL.innerHTML = '';
-                const d = s.val(); if(d) Object.keys(d).forEach(id => {
+                const d = s.val();
+                if(!d) {
+                    uP.innerHTML = `<div class="admin-empty col-span-2">No payment method added yet.</div>`;
+                    pL.innerHTML = `<div class="admin-empty">No payment methods yet.</div>`;
+                    return;
+                }
+                Object.keys(d).forEach(id => {
                     const pay = d[id] || {};
                     const name = pay.name || 'Payment';
                     const num = pay.num || '';
@@ -644,7 +731,7 @@
                         <i onclick="delPay('${id}')" class="fa-solid fa-times text-rose-400"></i>
                     </div>`;
                 });
-            });
+            }, (err) => dbError('Payments', err));
         }
 
         window.nav = (pageId, btn) => {
@@ -672,22 +759,24 @@
                 confirmButtonText: 'Yes, Reject'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    update(ref(db, `orders/${id}`), { st: "Rejected" }).then(() => notify('Order rejected', 'success'));
+                    update(ref(db, `orders/${id}`), { st: "Rejected" }).then(() => notify('Order rejected', 'success')).catch(err => dbError('Reject order', err));
                 }
             });
         };
 
         window.saveV = (id) => update(ref(db,`vpns/${id}`), { 
-            p1n: document.getElementById(`p1n-${id}`).value, p1p: document.getElementById(`p1p-${id}`).value,
-            p2n: document.getElementById(`p2n-${id}`).value, p2p: document.getElementById(`p2p-${id}`).value
-        }).then(() => notify('VPN configuration updated', 'success'));
+            p1n: document.getElementById(`p1n-${id}`).value.trim(), p1p: document.getElementById(`p1p-${id}`).value.trim(),
+            p2n: document.getElementById(`p2n-${id}`).value.trim(), p2p: document.getElementById(`p2p-${id}`).value.trim()
+        }).then(() => notify('VPN configuration updated', 'success')).catch(err => dbError('Update VPN', err));
 
         window.addStock = () => {
-            const e = document.getElementById('stock-email').value, p = document.getElementById('stock-pass').value, vid = document.getElementById('stock-vpn-id').value;
-            if(e && p) push(ref(db, `vpns/${vid}/stock`), { email: e, pass: p }).then(() => {
+            const e = document.getElementById('stock-email').value.trim(), p = document.getElementById('stock-pass').value.trim(), vid = document.getElementById('stock-vpn-id').value;
+            if(!vid) return notify('Create a VPN brand first', 'warning');
+            if(!e || !p) return notify('Enter email and password', 'warning');
+            push(ref(db, `vpns/${vid}/stock`), { email: e, pass: p }).then(() => {
                 document.getElementById('stock-email').value = ''; document.getElementById('stock-pass').value = '';
                 notify('Stock added successfully', 'success');
-            });
+            }).catch(err => dbError('Add stock', err));
         };
 
         let curV, curPl, curPr, curVid, curMethod;
@@ -711,37 +800,52 @@
             push(ref(db, 'orders'), { vpn: curV, vpn_id: curVid, plan: curPl, price: curPr, trx: trx.toUpperCase(), method: curMethod, uid: UID, user: UNAME, st: "Pending", date: dateStr }).then(() => {
                 notify('Order sent successfully', 'success', 'Admin will review your payment.'); document.getElementById('pay-modal').style.display = 'none';
                 document.getElementById('trx-id').value = '';
-            });
+            }).catch(err => dbError('Create order', err));
         };
 
         window.showStockList = async (orderId, vpnId) => {
-            const snap = await get(ref(db, `vpns/${vpnId}/stock`));
             const content = document.getElementById('stock-select-content');
             let h = `<div class="mb-4 font-bold flex justify-between">Select Account <button onclick="this.closest('.modal').style.display='none'">&times;</button></div>`;
-            if(snap.exists()) {
-                Object.keys(snap.val()).forEach(sk => {
-                    h += `<button class="w-full text-left p-4 bg-slate-50 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${orderId}','${vpnId}','${sk}')">${snap.val()[sk].email}</button>`;
-                });
-            } else h += `<p class="text-rose-500">Stock empty!</p>`;
-            content.innerHTML = h; document.getElementById('stock-select-modal').style.display = 'flex';
+            if(!vpnId) {
+                content.innerHTML = h + `<p class="text-rose-500 text-sm font-bold">This order has no VPN ID. Reject it or ask user to order again.</p>`;
+                document.getElementById('stock-select-modal').style.display = 'flex';
+                return;
+            }
+            try {
+                const snap = await get(ref(db, `vpns/${vpnId}/stock`));
+                if(snap.exists()) {
+                    Object.keys(snap.val()).forEach(sk => {
+                        const stock = snap.val()[sk] || {};
+                        h += `<button class="w-full text-left p-4 bg-slate-50 mb-2 rounded-xl font-bold text-xs" onclick="approveSelected('${orderId}','${vpnId}','${sk}')">${esc(stock.email || 'No email')}</button>`;
+                    });
+                } else h += `<p class="text-rose-500 text-sm font-bold">Stock empty! Add stock first.</p>`;
+                content.innerHTML = h; document.getElementById('stock-select-modal').style.display = 'flex';
+            } catch(err) { dbError('Load stock', err); }
         };
 
         window.approveSelected = async (orderId, vpnId, stockKey) => {
-            const snap = await get(ref(db, `vpns/${vpnId}/stock/${stockKey}`));
-            update(ref(db, `orders/${orderId}`), { st: "Approved", email: snap.val().email, pass: snap.val().pass }).then(() => {
-                remove(ref(db, `vpns/${vpnId}/stock/${stockKey}`));
+            try {
+                const snap = await get(ref(db, `vpns/${vpnId}/stock/${stockKey}`));
+                if(!snap.exists()) return notify('Selected stock not found', 'error');
+                await update(ref(db, `orders/${orderId}`), { st: "Approved", email: snap.val().email, pass: snap.val().pass });
+                await remove(ref(db, `vpns/${vpnId}/stock/${stockKey}`));
                 document.getElementById('stock-select-modal').style.display = 'none';
                 notify('Account delivered successfully', 'success');
-            });
+            } catch(err) { dbError('Approve order', err); }
         };
 
-        window.toggleV = (id, val) => update(ref(db, `vpns/${id}`), { status: val ? "ON" : "OFF" }).then(() => notify(val ? 'VPN is online' : 'VPN is offline', 'success'));
-        window.saveSupport = () => set(ref(db, 'supportUrl'), document.getElementById('set-support-url').value).then(() => notify('Support link saved', 'success'));
-        window.addPay = () => { const n = document.getElementById('pay-name').value, m = document.getElementById('pay-num-in').value, l = document.getElementById('pay-logo-in').value; if(n&&m) push(ref(db,'payments'),{name:n,num:m,logo:l}).then(() => { document.getElementById('pay-name').value=''; document.getElementById('pay-num-in').value=''; document.getElementById('pay-logo-in').value=''; notify('Payment method added', 'success'); }); else notify('Add payment name and number', 'warning'); };
-        window.delPay = (id) => remove(ref(db,`payments/${id}`)).then(() => notify('Payment method removed', 'success'));
-        window.addVpn = () => { const n = document.getElementById('v-name').value; if(n) push(ref(db,'vpns'),{name:n, status: "ON"}).then(() => notify('VPN brand created', 'success')); else notify('Enter VPN brand name', 'warning'); document.getElementById('v-name').value=''; };
-        window.delV = (id) => remove(ref(db,`vpns/${id}`)).then(() => notify('VPN brand deleted', 'success'));
-        window.delStockItem = (vid, skey) => remove(ref(db, `vpns/${vid}/stock/${skey}`)).then(() => notify('Stock item removed', 'success'));
+        window.toggleV = (id, val) => update(ref(db, `vpns/${id}`), { status: val ? "ON" : "OFF" }).then(() => notify(val ? 'VPN is online' : 'VPN is offline', 'success')).catch(err => dbError('Toggle VPN', err));
+        window.saveSupport = () => set(ref(db, 'supportUrl'), document.getElementById('set-support-url').value.trim()).then(() => notify('Support link saved', 'success')).catch(err => dbError('Save support link', err));
+        window.addPay = () => { const n = document.getElementById('pay-name').value.trim(), m = document.getElementById('pay-num-in').value.trim(), l = document.getElementById('pay-logo-in').value.trim(); if(n&&m) push(ref(db,'payments'),{name:n,num:m,logo:l}).then(() => { document.getElementById('pay-name').value=''; document.getElementById('pay-num-in').value=''; document.getElementById('pay-logo-in').value=''; notify('Payment method added', 'success'); }).catch(err => dbError('Add payment', err)); else notify('Add payment name and number', 'warning'); };
+        window.delPay = (id) => remove(ref(db,`payments/${id}`)).then(() => notify('Payment method removed', 'success')).catch(err => dbError('Delete payment', err));
+        window.addVpn = () => { const n = document.getElementById('v-name').value.trim(); if(!n) return notify('Enter VPN brand name', 'warning'); push(ref(db,'vpns'),{name:n, status: "ON"}).then(() => { document.getElementById('v-name').value=''; notify('VPN brand created', 'success'); }).catch(err => dbError('Add VPN', err)); };
+        window.delV = (id) => {
+            Swal.fire({ title: 'Delete VPN brand?', text: 'This will also remove saved stock under this VPN.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete' }).then(result => {
+                if(result.isConfirmed) remove(ref(db,`vpns/${id}`)).then(() => notify('VPN brand deleted', 'success')).catch(err => dbError('Delete VPN', err));
+            });
+        };
+        window.delStockItem = (vid, skey) => remove(ref(db, `vpns/${vid}/stock/${skey}`)).then(() => notify('Stock item removed', 'success')).catch(err => dbError('Delete stock', err));
+        window.forceRefreshAdmin = () => { updateAdminStatus(); notify('Admin panel refreshed', 'success'); };
         
         window.admTab = (t, btn) => {
             document.querySelectorAll('.adm-tab').forEach(b => b.classList.remove('adm-tab-active'));
@@ -749,7 +853,33 @@
             document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
             document.getElementById('adm-'+t).classList.remove('hidden');
         };
-        window.openAdmin = () => document.getElementById('admin-panel').classList.remove('hidden');
+        window.openAdmin = () => {
+            if (isAdmin()) {
+                updateAdminStatus();
+                document.getElementById('admin-panel').classList.remove('hidden');
+                return;
+            }
+            Swal.fire({
+                title: 'Admin Login',
+                text: 'Enter your admin Telegram ID.',
+                input: 'password',
+                inputPlaceholder: 'Admin ID',
+                showCancelButton: true,
+                confirmButtonText: 'Open Admin'
+            }).then(result => {
+                const entered = String(result.value || '').trim();
+                if (!result.isConfirmed) return;
+                if (ADMINS.includes(entered)) {
+                    sessionStorage.setItem(ADMIN_UNLOCK_KEY, 'yes');
+                    showAdminNavIfAllowed();
+                    updateAdminStatus();
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    notify('Admin panel unlocked', 'success');
+                } else {
+                    notify('Wrong admin ID', 'error');
+                }
+            });
+        };
         window.closeAdmin = () => document.getElementById('admin-panel').classList.add('hidden');
         window.copyText = (t) => { navigator.clipboard.writeText(t); notify('Copied', 'success'); };
     </script>
