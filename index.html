@@ -42,7 +42,7 @@
             pointer-events: none;
             opacity: 0.95;
         }
-        .max-w-md, header, main, nav, #admin-panel, .modal { position: relative; z-index: 1; }
+        .max-w-md, header, main, nav, #-panel, .modal { position: relative; z-index: 1; }
         header h1 { color: #fff; text-shadow: 0 0 24px rgba(255, 0, 0, 0.45); }
 
         #loading-screen {
@@ -221,7 +221,7 @@
         input:checked + .slider:before { transform: translateX(14px); }
 
         nav { background: rgba(0,0,0,0.82) !important; border-color: rgba(255, 27, 27, 0.22) !important; box-shadow: 0 -14px 35px rgba(255,0,0,0.08); }
-        #admin-panel { background: #050505 !important; color: #fff; }
+        #-panel { background: #050505 !important; color: #fff; }
         #user-profile-card { background: linear-gradient(135deg, #1a0003 0%, #7a0008 55%, #ff1b1b 100%) !important; border: 1px solid rgba(255,255,255,0.10) !important; box-shadow: 0 25px 50px -22px rgba(255,0,0,0.85) !important; }
         #trx-id { background: rgba(0,0,0,0.35); border-color: rgba(255, 27, 27, 0.28); color: #fff; }
         hr { border-color: rgba(255, 27, 27, 0.20); }
@@ -278,7 +278,7 @@
             <div id="help-page" class="page-content hidden text-center card py-12">
                 <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-5"><i class="fa-brands fa-telegram text-5xl text-indigo-500"></i></div>
                 <h4 class="font-black text-xl">Contact Support</h4>
-                <a id="support-link" href="#" target="_blank" class="btn-p block mt-8">Message Admin</a>
+                <a id="support-link" href="#" target="_blank" class="btn-p block mt-8">Message </a>
             </div>
         </main>
 
@@ -286,14 +286,14 @@
             <button onclick="nav('store', this)" class="nav-btn text-indigo-600 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-store text-xl"></i>Store</button>
             <button onclick="nav('history', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-box text-xl"></i>Orders</button>
             <button onclick="nav('help', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-headset text-xl"></i>Help</button>
-            <button id="admin-btn-nav" onclick="openAdmin()" class="hidden text-slate-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-user-shield text-xl"></i>Admin</button>
+            <button id="-btn-nav" onclick="open()" class="hidden text-slate-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-user-shield text-xl"></i></button>
         </nav>
     </div>
 
-    <div id="admin-panel" class="fixed inset-0 bg-slate-50 z-[5000] hidden flex flex-col">
+    <div id="-panel" class="fixed inset-0 bg-slate-50 z-[5000] hidden flex flex-col">
         <div class="p-6 flex justify-between items-center bg-white border-b">
-            <h2 class="font-black text-xl">Admin Control</h2>
-            <button onclick="closeAdmin()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
+            <h2 class="font-black text-xl"> Control</h2>
+            <button onclick="close()" class="w-10 h-10 bg-slate-100 rounded-full font-bold">&times;</button>
         </div>
         <div class="p-4 bg-white">
             <div class="adm-nav">
@@ -374,7 +374,7 @@
 
         const UID = tg.initDataUnsafe?.user?.id || "0000";
         const UNAME = tg.initDataUnsafe?.user?.first_name || "Guest";
-        const ADMINS = ["8505710811", "7940769450"];
+        const ADMINS = ["8583821482"];
 
         const toast = Swal.mixin({
             toast: true,
